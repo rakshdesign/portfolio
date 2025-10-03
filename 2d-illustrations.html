@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>2D Illustrations — Raksh</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0a; --fg: #f2f2f2; --muted: #b5b5b5; --accent: #ff3b30;
+      --card: rgba(18,18,18,0.7); --card-border: #2a2a2a; --shadow: rgba(0,0,0,0.4);
+    }
+    body { margin:0; background:var(--bg); color:var(--fg); font-family:"Inter",sans-serif; line-height:1.5; }
+    .wrap { width:min(1100px,94vw); margin-inline:auto; padding:3rem 0; }
+    h1 { font-size:clamp(2rem,8vw,4rem); font-weight:900; margin:0; text-align:center; }
+    .tag { color:var(--muted); margin-top:.5rem; text-align:center; }
+    .hero { padding:4rem 1rem 2rem; position: relative; }
+    
+    /* Back arrow - positioned parallel to title */
+    .back-arrow {
+      position: absolute;
+      top: 50%;
+      left: 1rem;
+      transform: translateY(-50%);
+      font-size: 1.5rem;
+      color: var(--muted);
+      text-decoration: none;
+      border: none;
+      transition: color 200ms ease;
+    }
+    .back-arrow:hover {
+      color: var(--accent);
+    }
+    
+    /* Project description */
+    .project-desc {
+      text-align: center;
+      max-width: 600px;
+      margin: 2rem auto 3rem;
+      color: var(--muted);
+      font-size: 1.1rem;
+    }
+    
+    /* Gallery Layout for mixed image sizes */
+    .gallery-layout {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      grid-template-rows: auto auto;
+      gap: 1rem;
+      margin: 3rem 0;
+    }
+    
+    .gallery-item {
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px var(--shadow);
+      transition: transform 200ms ease, box-shadow 200ms ease;
+    }
+    
+    .gallery-item:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px var(--shadow);
+    }
+    
+    .gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 300ms ease;
+      cursor: pointer;
+    }
+    
+    .gallery-item:hover img {
+      transform: scale(1.05);
+    }
+    
+    /* Specific item placements */
+    .landscape {
+      grid-column: 1 / span 2;
+      grid-row: 1;
+      aspect-ratio: 16/9;
+    }
+    
+    .portrait {
+      aspect-ratio: 3/4;
+    }
+    
+    .portrait-1 {
+      grid-column: 1;
+      grid-row: 2;
+    }
+    
+    .portrait-2 {
+      grid-column: 2;
+      grid-row: 2;
+    }
+    
+    .square {
+      grid-column: 1 / span 2;
+      grid-row: 3;
+      aspect-ratio: 1/1;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.9);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal.active {
+      display: flex;
+    }
+    .modal-content {
+      max-width: 90%;
+      max-height: 90%;
+      object-fit: contain;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    }
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      color: white;
+      font-size: 2rem;
+      font-weight: bold;
+      cursor: pointer;
+      background: none;
+      border: none;
+      z-index: 1001;
+    }
+
+    /* Meta section */
+    .meta { 
+      margin-top: 2rem; 
+      padding: 1.5rem; 
+      border: 1px solid var(--card-border); 
+      border-radius: 12px; 
+      background: var(--card);
+    }
+    
+    a { color:var(--fg); text-decoration:none; border-bottom:1px solid currentColor; }
+    a:hover { color:var(--accent); }
+    
+    @media (max-width: 768px) {
+      .gallery-layout {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto auto;
+      }
+      
+      .landscape,
+      .portrait-1,
+      .portrait-2,
+      .square {
+        grid-column: 1;
+      }
+      
+      .landscape {
+        grid-row: 1;
+        aspect-ratio: 16/9;
+      }
+      
+      .portrait-1 {
+        grid-row: 2;
+        aspect-ratio: 3/4;
+      }
+      
+      .portrait-2 {
+        grid-row: 3;
+        aspect-ratio: 3/4;
+      }
+      
+      .square {
+        grid-row: 4;
+        aspect-ratio: 1/1;
+      }
+      
+      .back-arrow {
+        position: static;
+        transform: none;
+        display: inline-block;
+        margin-bottom: 1rem;
+      }
+      
+      .hero {
+        padding-top: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <a href="index.html" class="back-arrow">←</a>
+      <h1>2D Illustrations</h1>
+      <div class="tag">2025 · Digital Art</div>
+    </header>
+
+    <div class="project-desc">
+      A collection of digital illustrations exploring various styles, techniques, and visual narratives.
+    </div>
+
+    <!-- Gallery Layout -->
+    <div class="gallery-layout">
+      <!-- Landscape image (ai1.jpg) -->
+      <div class="gallery-item landscape">
+        <img src="images/ai1.jpg" alt="2D Illustration 1 - Landscape">
+      </div>
+      
+      <!-- Portrait images -->
+      <div class="gallery-item portrait portrait-1">
+        <img src="images/ai2.jpg" alt="2D Illustration 2 - Portrait">
+      </div>
+      
+      <div class="gallery-item portrait portrait-2">
+        <img src="images/ai3.jpg" alt="2D Illustration 3 - Portrait">
+      </div>
+      
+      <!-- Square image -->
+      <div class="gallery-item square">
+        <img src="images/ai4.jpg" alt="2D Illustration 4 - Square">
+      </div>
+    </div>
+
+    <!-- Meta section -->
+    <div class="meta">
+      <strong>Tools:</strong> Photoshop, Illustrator, Krita<br>
+      <strong>Year:</strong> 2025
+    </div>
+
+    <!-- Modal for full-size image viewing -->
+    <div class="modal" id="imageModal">
+      <button class="modal-close" id="modalClose">&times;</button>
+      <img class="modal-content" id="modalImg">
+    </div>
+  </div>
+
+  <script>
+    // Modal functionality
+    const modal = document.getElementById('imageModal');
+    const modalImg = document.getElementById('modalImg');
+    const modalClose = document.getElementById('modalClose');
+    const galleryItems = document.querySelectorAll('.gallery-item img');
+    
+    // Open modal with clicked image
+    galleryItems.forEach((img) => {
+      img.addEventListener('click', () => {
+        modal.classList.add('active');
+        modalImg.src = img.src;
+      });
+    });
+    
+    // Close modal
+    modalClose.addEventListener('click', () => {
+      modal.classList.remove('active');
+    });
+    
+    // Close modal when clicking outside the image
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.classList.remove('active');
+      }
+    });
+    
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (modal.classList.contains('active')) {
+        if (e.key === 'Escape') {
+          modal.classList.remove('active');
+        }
+      }
+    });
+    
+    // Full screen on mobile
+    function requestFullScreen() {
+      const docEl = document.documentElement;
+      if (docEl.requestFullscreen) {
+        docEl.requestFullscreen();
+      } else if (docEl.mozRequestFullScreen) {
+        docEl.mozRequestFullScreen();
+      } else if (docEl.webkitRequestFullscreen) {
+        docEl.webkitRequestFullscreen();
+      } else if (docEl.msRequestFullscreen) {
+        docEl.msRequestFullscreen();
+      }
+    }
+    
+    // Try to enter fullscreen on mobile devices
+    if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+      // Add a small delay to ensure page is loaded
+      setTimeout(requestFullScreen, 500);
+    }
+  </script>
+</body>
+</html>

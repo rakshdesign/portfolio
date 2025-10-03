@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RAKSH — Photography</title>
+  <meta name="description" content="Photography portfolio - Black and white mosaic gallery that reveals color on click" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --fg: #f2f2f2;
+      --muted: #b5b5b5;
+      --accent: #ff3b30;
+      --card: rgba(18,18,18,0.7);
+      --card-border: #2a2a2a;
+      --thumb: #161616;
+      --link: #f2f2f2;
+      --link-hover: var(--accent);
+      --focus: #ffd4d1;
+      --shadow: rgba(0,0,0,0.4);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { height: 100%; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+      text-rendering: optimizeLegibility;
+      cursor: none;
+    }
+
+    /* Custom red circle cursor */
+    .custom-cursor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 20px;
+      height: 20px;
+      background: var(--accent);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      mix-blend-mode: difference;
+      transition: transform 0.1s ease;
+    }
+
+    .custom-cursor.hover {
+      transform: scale(1.5);
+    }
+
+    .layer { position: relative; z-index: 1; }
+    .wrap { width: min(1400px, 94vw); margin-inline: auto; }
+
+    header.hero {
+      min-height: 30svh;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .brand {
+      letter-spacing: -0.04em;
+      font-weight: 900;
+      line-height: 0.9;
+      text-transform: uppercase;
+      margin: 0;
+      padding: 0 0.5rem;
+      text-shadow: 0 6px 24px var(--shadow);
+    }
+    .brand .raksh { display: block; font-size: clamp(2.5rem, 10vw, 8rem); }
+
+    /* Back arrow */
+    .back-arrow {
+      position: absolute;
+      top: 2rem;
+      left: 2rem;
+      font-weight: 400;
+      font-size: 2rem;
+      color: var(--fg);
+      text-decoration: none;
+      border: none;
+      transition: color 0.2s ease;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .back-arrow:hover {
+      color: var(--accent);
+    }
+
+    /* Mosaic Grid - Fixed Layout */
+    .mosaic-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      grid-auto-rows: 280px;
+      gap: 1.5rem;
+      padding: 4rem 0;
+    }
+
+    .mosaic-item {
+      position: relative;
+      overflow: hidden;
+      border-radius: 12px;
+      cursor: none;
+      transition: transform 0.3s ease, filter 0.3s ease;
+      background: var(--thumb);
+    }
+
+    .mosaic-item:hover {
+      transform: scale(1.03);
+      filter: brightness(1.1);
+    }
+
+    .mosaic-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: grayscale(100%) contrast(1.1);
+      transition: filter 0.5s ease, transform 0.3s ease;
+    }
+
+    .mosaic-item:hover img {
+      transform: scale(1.05);
+    }
+
+    .mosaic-item.active img {
+      filter: grayscale(0%);
+    }
+
+    /* Loading states */
+    .image-loading {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--thumb);
+    }
+
+    .loading-spinner {
+      width: 30px;
+      height: 30px;
+      border: 3px solid var(--card-border);
+      border-top: 3px solid var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Modal for full-size color image */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(10, 10, 10, 0.98);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .modal.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-content {
+      position: relative;
+      max-width: 95%;
+      max-height: 95%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      border-radius: 8px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+    }
+
+    .modal-loading {
+      width: 60px;
+      height: 60px;
+      border: 4px solid var(--card-border);
+      border-top: 4px solid var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    .close-modal {
+      position: absolute;
+      top: 25px;
+      right: 30px;
+      font-size: 2.5rem;
+      color: var(--fg);
+      background: none;
+      border: none;
+      cursor: none;
+      z-index: 1001;
+      transition: color 0.2s ease;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .close-modal:hover {
+      color: var(--accent);
+    }
+
+    .nav-button {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255, 59, 48, 0.3);
+      color: var(--fg);
+      border: none;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      font-size: 2rem;
+      cursor: none;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: background 0.2s ease;
+      z-index: 1001;
+      backdrop-filter: blur(10px);
+    }
+
+    .nav-button:hover {
+      background: rgba(255, 59, 48, 0.6);
+    }
+
+    .prev {
+      left: 25px;
+    }
+
+    .next {
+      right: 25px;
+    }
+
+    footer { 
+      padding: 4rem 0 6rem; 
+      color: var(--muted); 
+      border-top: 1px solid var(--card-border); 
+      text-align: center;
+    }
+
+    a { 
+      color: var(--link); 
+      text-decoration: none; 
+      border-bottom: 1px solid currentColor; 
+    }
+    a:hover { color: var(--link-hover); }
+    a:focus-visible {
+      outline: 2px solid var(--focus);
+      outline-offset: 3px;
+      border-bottom: none;
+      border-radius: 4px;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 1024px) {
+      .mosaic-grid {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        grid-auto-rows: 240px;
+        gap: 1.2rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .mosaic-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        grid-auto-rows: 200px;
+        gap: 1rem;
+        padding: 2rem 0;
+      }
+      
+      .nav-button {
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
+      }
+      
+      .prev {
+        left: 15px;
+      }
+      
+      .next {
+        right: 15px;
+      }
+      
+      .close-modal {
+        top: 20px;
+        right: 20px;
+        font-size: 2rem;
+        width: 45px;
+        height: 45px;
+      }
+      
+      .back-arrow {
+        top: 1.5rem;
+        left: 1.5rem;
+        font-size: 1.5rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .mosaic-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        grid-auto-rows: 150px;
+        gap: 0.8rem;
+      }
+      
+      .nav-button {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+      }
+    }
+
+    /* Hide default cursor for interactive elements */
+    a, button, .mosaic-item {
+      cursor: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="custom-cursor"></div>
+
+  <div class="layer">
+    <a href="index.html" class="back-arrow" aria-label="Back to portfolio">←</a>
+    
+    <header class="hero" role="banner">
+      <div class="wrap">
+        <h1 class="brand" aria-label="Raksh — Photography">
+          <span class="raksh" id="heroText">PHOTOGRAPHY</span>
+        </h1>
+      </div>
+    </header>
+
+    <main id="main" role="main">
+      <div class="wrap">
+        <div class="mosaic-grid" id="mosaicGrid">
+          <!-- Images will be dynamically inserted here -->
+        </div>
+      </div>
+    </main>
+
+    <footer role="contentinfo">
+      <div class="wrap">
+        <p>Email: <a href="mailto:rakshankumargiri@gmail.com" rel="me">rakshankumargiri@gmail.com</a>
+        · Instagram: <a href="https://www.instagram.com/raksh.design" rel="me noopener">raksh.design</a></p>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Modal for full-size image viewing -->
+  <div class="modal" id="imageModal">
+    <button class="close-modal" id="closeModal" aria-label="Close image">×</button>
+    <button class="nav-button prev" id="prevButton" aria-label="Previous image">‹</button>
+    <button class="nav-button next" id="nextButton" aria-label="Next image">›</button>
+    <div class="modal-content">
+      <div class="modal-loading" id="modalLoading"></div>
+      <img id="modalImage" src="" alt="" style="display: none;">
+    </div>
+  </div>
+
+  <script>
+    // Custom cursor functionality
+    const cursor = document.querySelector('.custom-cursor');
+    
+    document.addEventListener('mousemove', (e) => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+    });
+
+    // Add hover effect for interactive elements
+    const interactiveElements = document.querySelectorAll('a, button, .mosaic-item');
+    interactiveElements.forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        cursor.classList.add('hover');
+      });
+      el.addEventListener('mouseleave', () => {
+        cursor.classList.remove('hover');
+      });
+    });
+
+    // Hide cursor when leaving window
+    document.addEventListener('mouseleave', () => {
+      cursor.style.opacity = '0';
+    });
+    
+    document.addEventListener('mouseenter', () => {
+      cursor.style.opacity = '1';
+    });
+
+    // Image data with apple image names and .jpg extension
+    const images = Array.from({ length: 20 }, (_, i) => {
+      const id = i + 1;
+      return {
+        id: id,
+        // Using same image for both thumbnail and full-size for simplicity
+        // Updated to .jpg extension
+        bw: `images/apple${id}.jpg`,
+        color: `images/apple${id}.jpg`,
+        title: `Apple ${id}`
+      };
+    });
+
+    // Initialize the mosaic grid
+    const mosaicGrid = document.getElementById('mosaicGrid');
+    const modal = document.getElementById('imageModal');
+    const modalImage = document.getElementById('modalImage');
+    const modalLoading = document.getElementById('modalLoading');
+    const closeModal = document.getElementById('closeModal');
+    const prevButton = document.getElementById('prevButton');
+    const nextButton = document.getElementById('nextButton');
+
+    let currentImageIndex = 0;
+
+    // Create mosaic items with actual images
+    images.forEach((image, index) => {
+      const mosaicItem = document.createElement('div');
+      mosaicItem.className = 'mosaic-item';
+      mosaicItem.setAttribute('data-id', image.id);
+      mosaicItem.setAttribute('data-index', index);
+      
+      // Create loading spinner
+      const loadingSpinner = document.createElement('div');
+      loadingSpinner.className = 'loading-spinner';
+      
+      // Create image element
+      const img = document.createElement('img');
+      img.src = image.bw;
+      img.alt = image.title;
+      img.loading = 'lazy'; // Lazy loading for better performance
+      img.style.display = 'none'; // Hide initially
+      
+      // Handle image loading
+      img.onload = function() {
+        loadingSpinner.style.display = 'none';
+        img.style.display = 'block';
+      };
+      
+      img.onerror = function() {
+        loadingSpinner.style.display = 'none';
+        console.warn(`Failed to load image: ${image.bw}`);
+        // Create fallback placeholder
+        const placeholder = document.createElement('div');
+        placeholder.style.width = '100%';
+        placeholder.style.height = '100%';
+        placeholder.style.display = 'flex';
+        placeholder.style.alignItems = 'center';
+        placeholder.style.justifyContent = 'center';
+        placeholder.style.background = 'var(--thumb)';
+        placeholder.style.color = 'var(--muted)';
+        placeholder.style.fontWeight = '700';
+        placeholder.style.fontSize = '1.2rem';
+        placeholder.textContent = `Apple ${image.id}`;
+        mosaicItem.appendChild(placeholder);
+      };
+      
+      mosaicItem.appendChild(loadingSpinner);
+      mosaicItem.appendChild(img);
+      mosaicGrid.appendChild(mosaicItem);
+      
+      // Add click event to show color image in modal
+      mosaicItem.addEventListener('click', () => {
+        currentImageIndex = index;
+        showImageInModal(currentImageIndex);
+      });
+    });
+
+    // Show image in modal
+    function showImageInModal(index) {
+      const imageData = images[index];
+      
+      // Show loading state
+      modalLoading.style.display = 'block';
+      modalImage.style.display = 'none';
+      
+      // Load the full-size image
+      modalImage.src = imageData.color;
+      modalImage.alt = imageData.title;
+      
+      modalImage.onload = function() {
+        modalLoading.style.display = 'none';
+        modalImage.style.display = 'block';
+      };
+      
+      modalImage.onerror = function() {
+        modalLoading.style.display = 'none';
+        console.warn(`Failed to load full-size image: ${imageData.color}`);
+        // You could add a fallback here
+      };
+      
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+      
+      // Preload adjacent images for smoother navigation
+      preloadAdjacentImages(index);
+    }
+
+    // Preload adjacent images for smoother modal navigation
+    function preloadAdjacentImages(currentIndex) {
+      const prevIndex = (currentIndex - 1 + images.length) % images.length;
+      const nextIndex = (currentIndex + 1) % images.length;
+      
+      [prevIndex, nextIndex].forEach(index => {
+        const img = new Image();
+        img.src = images[index].color;
+      });
+    }
+
+    // Close modal
+    function closeImageModal() {
+      modal.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    // Navigation functions
+    function showNextImage() {
+      currentImageIndex = (currentImageIndex + 1) % images.length;
+      showImageInModal(currentImageIndex);
+    }
+
+    function showPrevImage() {
+      currentImageIndex = (currentImageIndex - 1 + images.length) % images.length;
+      showImageInModal(currentImageIndex);
+    }
+
+    // Event listeners
+    closeModal.addEventListener('click', closeImageModal);
+    nextButton.addEventListener('click', showNextImage);
+    prevButton.addEventListener('click', showPrevImage);
+
+    // Close modal when clicking outside the image
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        closeImageModal();
+      }
+    });
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (!modal.classList.contains('active')) return;
+      
+      switch(e.key) {
+        case 'Escape':
+          closeImageModal();
+          break;
+        case 'ArrowRight':
+          showNextImage();
+          break;
+        case 'ArrowLeft':
+          showPrevImage();
+          break;
+      }
+    });
+
+    // Preload first few images for better initial experience
+    function preloadInitialImages() {
+      // Preload first 4 images
+      for (let i = 0; i < Math.min(4, images.length); i++) {
+        const img = new Image();
+        img.src = images[i].bw;
+      }
+    }
+
+    // Start preloading when page loads
+    window.addEventListener('load', preloadInitialImages);
+  </script>
+</body>
+</html>

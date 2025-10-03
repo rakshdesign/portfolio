@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en" data-mode="init">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RAKSH — Portfolio</title>
+  <meta name="description" content="Raksh — Visual Communication Designer. Dark portfolio with a scroll-rotating 3D cube hero and resilient fallback." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --fg: #f2f2f2;
+      --muted: #b5b5b5;
+      --accent: #ff3b30;
+      --card: rgba(18,18,18,0.7);
+      --card-border: #2a2a2a;
+      --thumb: #161616;
+      --link: #f2f2f2;
+      --link-hover: var(--accent);
+      --focus: #ffd4d1;
+      --shadow: rgba(0,0,0,0.4);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { height: 100%; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+      text-rendering: optimizeLegibility;
+      cursor: none;
+    }
+
+    /* Custom red circle cursor */
+    .custom-cursor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 20px;
+      height: 20px;
+      background: var(--accent);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      mix-blend-mode: difference;
+      transition: transform 0.1s ease;
+    }
+
+    .custom-cursor.hover {
+      transform: scale(1.5);
+    }
+
+    #bg3d, #fallback3d {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      display: block;
+      width: 100vw;
+      height: 100vh;
+    }
+    #fallback3d { display: none; }
+    #bg3d { image-rendering: crisp-edges; image-rendering: pixelated; }
+
+    .layer { position: relative; z-index: 1; }
+    .wrap { width: min(1200px, 94vw); margin-inline: auto; }
+
+    header.hero {
+      min-height: 100svh;
+      display: grid;
+      place-items: center;
+      text-align: center;
+    }
+    .brand {
+      letter-spacing: -0.04em;
+      font-weight: 900;
+      line-height: 0.9;
+      text-transform: uppercase;
+      margin: 0;
+      padding: 0 0.5rem;
+      text-shadow: 0 6px 24px var(--shadow);
+    }
+    .brand .raksh { display: block; font-size: clamp(3.5rem, 14vw, 13rem); }
+    .typewriter {
+      min-height: 1.5em;
+      margin-top: 1rem;
+    }
+    .typewriter-text {
+      color: var(--muted);
+      font-weight: 300;
+      border-right: 2px solid var(--accent);
+      animation: blink 1s infinite;
+      font-size: clamp(1rem, 1.5vw, 1.2rem);
+    }
+
+    @keyframes blink {
+      0%, 100% { border-color: var(--accent); }
+      50% { border-color: transparent; }
+    }
+
+    section { padding: 6rem 0 4rem; border-top: 1px solid var(--card-border); }
+    h2 { font-size: clamp(1.4rem, 2.4vw, 2rem); margin: 0 0 1rem; letter-spacing: -0.02em; }
+    p { max-width: 70ch; color: var(--fg); opacity: 0.9; }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin-top: 2rem; }
+    .card {
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 1.5rem;
+      transition: transform 200ms ease, border-color 200ms ease, background 200ms ease;
+      background: var(--card);
+      backdrop-filter: saturate(1.05) blur(2px);
+      box-shadow: 0 8px 24px var(--shadow);
+      min-height: 120px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .card:hover { transform: translateY(-4px); border-color: var(--accent); }
+    .meta { display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem; }
+    .meta .title { font-weight: 700; font-size: 1.2rem; }
+    .meta .tag { margin: 0; font-size: 0.9rem; color: var(--muted); }
+
+    footer { padding: 4rem 0 6rem; color: var(--muted); border-top: 1px solid var(--card-border); }
+    a { 
+      color: var(--link); 
+      text-decoration: none; 
+      border-bottom: 1px solid currentColor; 
+    }
+    a:hover { color: var(--link-hover); }
+    a:focus-visible {
+      outline: 2px solid var(--focus);
+      outline-offset: 3px;
+      border-bottom: none;
+      border-radius: 4px;
+    }
+
+    .section-active h2 { color: var(--accent); transition: color 200ms ease; }
+
+    /* About typewriter styles */
+    .about-content {
+      position: relative;
+    }
+    .about-line {
+      min-height: 1.6em;
+      margin-bottom: 1rem;
+      opacity: 0;
+      animation: fadeIn 0.5s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      to { opacity: 0.9; }
+    }
+
+    /* Contact section mobile styles */
+    .contact-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .contact-separator {
+      color: var(--muted);
+    }
+
+    /* Hide default cursor for interactive elements */
+    a, button, .card {
+      cursor: none;
+    }
+
+    /* Mobile styles */
+    @media (max-width: 768px) {
+      .contact-links {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+      }
+      
+      .contact-separator {
+        display: none;
+      }
+      
+      .card {
+        padding: 1.25rem;
+        min-height: 100px;
+      }
+      
+      .meta .title {
+        font-size: 1.1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="custom-cursor"></div>
+  <canvas id="bg3d" aria-hidden="true"></canvas>
+
+  <svg id="fallback3d" aria-hidden="true" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="1.2" result="glow" />
+        <feMerge>
+          <feMergeNode in="glow"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+      </filter>
+    </defs>
+    <g id="cubeGroup" stroke="var(--accent)" stroke-width="1.2" fill="none" filter="url(#softGlow)">
+      <rect x="30" y="30" width="40" height="40" rx="1"/>
+      <rect x="38" y="22" width="40" height="40" rx="1"/>
+      <line x1="30" y1="30" x2="38" y2="22"/>
+      <line x1="70" y1="30" x2="78" y2="22"/>
+      <line x1="30" y1="70" x2="38" y2="62"/>
+      <line x1="70" y1="70" x2="78" y2="62"/>
+    </g>
+  </svg>
+
+  <div class="layer">
+    <header class="hero" role="banner">
+      <div class="wrap">
+        <h1 class="brand" aria-label="Raksh — Visual Communication Designer">
+          <span class="raksh" id="heroText">RAKSH</span>
+        </h1>
+        <div class="typewriter">
+          <span class="typewriter-text" id="dynamicText"></span>
+        </div>
+      </div>
+    </header>
+
+    <main id="main" role="main">
+      <section id="work" aria-labelledby="work-title">
+        <div class="wrap">
+          <h2 id="work-title">Works</h2>
+          <p>A few projects I enjoyed making.</p>
+          <div class="grid">
+            <!-- Poster Series -->
+            <a class="card" href="poster-series.html" aria-labelledby="p3-title">
+              <div class="meta">
+                <div class="title" id="p3-title">Poster Series</div>
+                <div class="tag">2025</div>
+              </div>
+            </a>
+
+            <!-- Disconnect Zine -->
+            <a class="card" href="disconnect-zine.html" aria-labelledby="zine-title">
+              <div class="meta">
+                <div class="title" id="zine-title">Disconnect</div>
+                <div class="tag">2025</div>
+              </div>
+            </a>
+
+            <!-- Photography -->
+            <a class="card" href="photography.html" aria-labelledby="p1-title">
+              <div class="meta">
+                <div class="title" id="p1-title">Photography</div>
+                <div class="tag">2025</div>
+              </div>
+            </a>
+
+            <!-- Packaging -->
+            <a class="card" href="packaging.html" aria-labelledby="p2-title">
+              <div class="meta">
+                <div class="title" id="p2-title">Packaging</div>
+                <div class="tag">2025</div>
+              </div>
+            </a>
+
+            <!-- 2D Illustrations -->
+            <a class="card" href="2d-illustrations.html" aria-labelledby="p5-title">
+              <div class="meta">
+                <div class="title" id="p5-title">2D Illustrations</div>
+                <div class="tag">2025</div>
+              </div>
+            </a>
+
+            <!-- 2D Animation -->
+            <a class="card" href="2d-animation.html" aria-labelledby="p4-title">
+              <div class="meta">
+                <div class="title" id="p4-title">2D Animation</div>
+                <div class="tag">2024</div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section id="about" aria-labelledby="about-title">
+        <div class="wrap">
+          <h2 id="about-title">About</h2>
+          <div class="about-content" id="aboutContent">
+            <!-- Typewriter content will be inserted here -->
+          </div>
+        </div>
+      </section>
+
+      <section id="contact" aria-labelledby="contact-title">
+        <div class="wrap">
+          <h2 id="contact-title">Contact</h2>
+          <div class="contact-links">
+            <span>Email: <a href="mailto:rakshankumargiri@gmail.com" rel="me">rakshankumargiri@gmail.com</a></span>
+            <span class="contact-separator">·</span>
+            <span>Instagram: <a href="https://www.instagram.com/raksh.design" rel="me noopener">raksh.design</a></span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer role="contentinfo">
+      <div class="wrap"></div>
+    </footer>
+  </div>
+
+  <noscript>
+    <style>
+      #fallback3d { display: block !important; }
+      #bg3d { display: none !important; }
+      body { cursor: auto; }
+      .custom-cursor { display: none; }
+    </style>
+  </noscript>
+
+  <script>
+    // Natural typing speed variation function
+    function getRandomTypingSpeed() {
+      return Math.random() * 60 + 40; // Between 40ms and 100ms
+    }
+
+    // Hero typewriter effect
+    const roles = ['Designer', 'Student', 'Observer', 'Story teller', 'Problem solver', 'Dreamer'];
+    const dynamicText = document.getElementById('dynamicText');
+    let roleIndex = 0;
+    let charIndex = 0;
+    let isDeleting = false;
+    let typingSpeed = 100;
+
+    function typeWriter() {
+      const currentRole = roles[roleIndex];
+      
+      if (isDeleting) {
+        dynamicText.textContent = currentRole.substring(0, charIndex - 1);
+        charIndex--;
+        typingSpeed = getRandomTypingSpeed() * 0.7; // Faster when deleting
+      } else {
+        dynamicText.textContent = currentRole.substring(0, charIndex + 1);
+        charIndex++;
+        typingSpeed = getRandomTypingSpeed();
+      }
+
+      if (!isDeleting && charIndex === currentRole.length) {
+        typingSpeed = 1500 + Math.random() * 1000; // Random pause between 1.5-2.5s
+        isDeleting = true;
+      } else if (isDeleting && charIndex === 0) {
+        isDeleting = false;
+        roleIndex = (roleIndex + 1) % roles.length;
+        typingSpeed = 500 + Math.random() * 500; // Random pause before next word
+      }
+
+      setTimeout(typeWriter, typingSpeed);
+    }
+
+    // About section typewriter effect
+    const aboutLines = [
+      "I believe good design lives in the tension between intuition and intention.",
+      "Currently navigating the spaces between student and practitioner,",
+      "learning that the most compelling work often emerges from constraints.",
+      " ",
+      "My practice is rooted in observation, collecting fragments of the everyday",
+      "and reassembling them into something meaningful.",
+      "I'm drawn to the quiet moments, the overlooked details,",
+      "and the stories waiting to be told through visual language.",
+      " ",
+      "When I'm not designing, you'll find me documenting the world through my camera,",
+      "hunting for good movies to watch,",
+      "or overthinking the kerning on restaurant menus."
+    ];
+
+    function typeAboutSection() {
+      const aboutContent = document.getElementById('aboutContent');
+      let lineIndex = 0;
+      let currentLine = '';
+      let lineCharIndex = 0;
+      let isAboutTyping = true;
+
+      function typeAboutLine() {
+        if (lineIndex >= aboutLines.length) return;
+
+        const targetLine = aboutLines[lineIndex];
+        
+        if (lineCharIndex < targetLine.length) {
+          currentLine += targetLine.charAt(lineCharIndex);
+          lineCharIndex++;
+          
+          // Create or update the current line element
+          let lineElement = aboutContent.children[lineIndex];
+          if (!lineElement) {
+            lineElement = document.createElement('div');
+            lineElement.className = 'about-line';
+            aboutContent.appendChild(lineElement);
+          }
+          lineElement.textContent = currentLine;
+          
+          setTimeout(typeAboutLine, getRandomTypingSpeed());
+        } else {
+          // Move to next line after a pause
+          currentLine = '';
+          lineCharIndex = 0;
+          lineIndex++;
+          setTimeout(typeAboutLine, 800 + Math.random() * 400); // Random pause between lines
+        }
+      }
+
+      // Start typing about section after hero typing begins
+      setTimeout(typeAboutLine, 3000);
+    }
+
+    // Start typewriters
+    setTimeout(typeWriter, 1000);
+    typeAboutSection();
+
+    // Custom cursor functionality
+    const cursor = document.querySelector('.custom-cursor');
+    
+    document.addEventListener('mousemove', (e) => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+    });
+
+    // Add hover effect for interactive elements
+    const interactiveElements = document.querySelectorAll('a, .card, button');
+    interactiveElements.forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        cursor.classList.add('hover');
+      });
+      el.addEventListener('mouseleave', () => {
+        cursor.classList.remove('hover');
+      });
+    });
+
+    // Hide cursor when leaving window
+    document.addEventListener('mouseleave', () => {
+      cursor.style.opacity = '0';
+    });
+    
+    document.addEventListener('mouseenter', () => {
+      cursor.style.opacity = '1';
+    });
+
+    const canvas = document.getElementById('bg3d');
+    canvas.setAttribute('role', 'img');
+    canvas.setAttribute('aria-label', 'Decorative 3D background');
+
+    function mapScrollToAngles() {
+      const s = (window.scrollY || 0) / Math.max(1, window.innerHeight);
+      return { rx: 0.25 + s * 0.8, ry: -0.35 + s * 1.2, a2d: (s * 180) % 360 };
+    }
+
+    function throttle(fn, limit) {
+      let inThrottle = false, lastArgs = null;
+      return function(...args) {
+        lastArgs = args;
+        if (!inThrottle) {
+          inThrottle = true;
+          fn.apply(this, lastArgs);
+          setTimeout(() => {
+            inThrottle = false;
+            if (lastArgs) fn.apply(this, lastArgs);
+            lastArgs = null;
+          }, limit);
+        }
+      };
+    }
+
+    const svg = document.getElementById('fallback3d');
+    const cubeGroup = svg.querySelector('#cubeGroup');
+    function enableFallback(reason) {
+      document.documentElement.setAttribute('data-mode', 'fallback');
+      svg.style.display = 'block';
+      canvas.style.display = 'none';
+      const media = window.matchMedia('(prefers-reduced-motion: reduce)');
+      let angle = 0, rafId = null;
+      function renderFallback() {
+        const { a2d } = mapScrollToAngles();
+        if (media.matches) {
+          cubeGroup.setAttribute('transform', `rotate(${a2d} 50 50)`);
+          return;
+        }
+        angle += (a2d - angle) * 0.06;
+        cubeGroup.setAttribute('transform', `rotate(${angle} 50 50)`);
+        rafId = requestAnimationFrame(renderFallback);
+      }
+      renderFallback();
+      window.addEventListener('scroll', throttle(renderFallback, 50), { passive: true });
+      window.addEventListener('beforeunload', () => { if (rafId) cancelAnimationFrame(rafId); }, { once: true });
+      console.warn('Using SVG fallback:', reason);
+    }
+
+    function canAcquireWebGLContext(cnv) {
+      try { return !!(cnv.getContext('webgl2') || cnv.getContext('webgl') || cnv.getContext('experimental-webgl')); }
+      catch { return false; }
+    }
+
+    const startWebGL = () => {
+      if (!canAcquireWebGLContext(canvas)) { enableFallback('WebGL not supported or disabled'); return; }
+      const s = document.createElement('script');
+      s.src = 'https://unpkg.com/three@0.160.0/build/three.min.js';
+      s.crossOrigin = 'anonymous';
+      s.defer = true;
+      s.onload = initThreeScene;
+      s.onerror = () => enableFallback('Three.js failed to load');
+      document.head.appendChild(s);
+    };
+
+    if ('requestIdleCallback' in window) requestIdleCallback(startWebGL, { timeout: 2000 });
+    else window.addEventListener('load', startWebGL, { once: true });
+
+    function initThreeScene() {
+      if (typeof window.THREE === 'undefined') { enableFallback('THREE not available after load'); return; }
+
+      let renderer;
+      try {
+        renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
+      } catch (e) { console.error('Renderer init error:', e); enableFallback('Renderer init exception'); return; }
+
+      document.documentElement.setAttribute('data-mode', 'webgl');
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+
+      const scene = new THREE.Scene();
+      scene.fog = new THREE.FogExp2(0x0a0a0a, 0.06);
+
+      // Camera setup to avoid distortion and align cube center with hero text center on mobile
+      const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+      camera.position.set(0, 0, 4.2);
+
+      const ambient = new THREE.AmbientLight(0xffffff, 0.2); scene.add(ambient);
+      const dir = new THREE.DirectionalLight(0xffffff, 0.4); dir.position.set(2, 2, 3); scene.add(dir);
+
+      const geo = new THREE.BoxGeometry(2, 2, 2);
+      const mat = new THREE.MeshBasicMaterial({ color: 0xff3b30, wireframe: true });
+      const cube = new THREE.Mesh(geo, mat);
+      scene.add(cube);
+
+      // Points cloud
+      const pts = new THREE.BufferGeometry().setFromPoints(
+        Array.from({ length: 320 }, () => new THREE.Vector3(
+          (Math.random() - 0.5) * 18,
+          (Math.random() - 0.5) * 18,
+          (Math.random() - 0.5) * 18
+        ))
+      );
+      const pmat = new THREE.PointsMaterial({ size: 0.02, color: 0xaaaaaa, transparent: true, opacity: 0.5 });
+      const dots = new THREE.Points(pts, pmat);
+      scene.add(dots);
+
+      // Responsive cube scale and centroid alignment for mobile
+      function applyResponsiveScaleAndAlignment() {
+        const isMobile = window.matchMedia('(max-width: 600px)').matches;
+        const scale = isMobile ? 0.5 : 1.0; // half size on mobile
+        cube.scale.set(scale, scale, scale);
+
+        // Align cube's projected center with hero text center
+        // We center camera/cube at origin and ensure canvas fully covers viewport
+        // For extra precision, adjust camera FOV slightly on very tall viewports
+        const aspect = window.innerWidth / window.innerHeight;
+        camera.aspect = aspect;
+        camera.fov = 50; // keep constant to avoid distortion
+        camera.updateProjectionMatrix();
+
+        // No translations needed because hero text is centered via CSS grid
+        // and camera looks at origin where cube resides.
+        camera.position.set(0, 0, 4.2);
+        camera.lookAt(0, 0, 0);
+      }
+
+      function resize() {
+        const w = Math.max(1, window.innerWidth);
+        const h = Math.max(1, window.innerHeight);
+        renderer.setSize(w, h, false);
+        applyResponsiveScaleAndAlignment();
+      }
+      window.addEventListener('resize', throttle(resize, 100), { passive: true });
+      resize();
+
+      // Scroll-driven rotations
+      let { rx, ry } = mapScrollToAngles();
+      window.addEventListener('scroll', throttle(() => {
+        const a = mapScrollToAngles(); rx = a.rx; ry = a.ry;
+      }, 50), { passive: true });
+
+      // Pointer parallax
+      let px = 0, py = 0;
+      window.addEventListener('pointermove', throttle((e) => {
+        px = (e.clientX / window.innerWidth) - 0.5;
+        py = (e.clientY / window.innerHeight) - 0.5;
+      }, 16), { passive: true });
+
+      const sections = document.querySelectorAll('section');
+      const io = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          entry.target.classList.toggle('section-active', entry.isIntersecting && entry.intersectionRatio >= 0.6);
+        });
+      }, { threshold: [0, 0.6, 1] });
+      sections.forEach(s => io.observe(s));
+
+      const media = window.matchMedia('(prefers-reduced-motion: reduce)');
+      const lerp = (a, b, t) => a + (b - a) * t;
+
+      let rafId = null;
+      function tick() {
+        if (!media.matches) {
+          cube.rotation.y += 0.003;
+          cube.rotation.x += 0.0015;
+          dots.rotation.y += 0.0006;
+        }
+        const parallaxScale = 0.12;
+        const targetX = rx + (-py) * parallaxScale;
+        const targetY = ry + (px) * parallaxScale;
+
+        cube.rotation.x = lerp(cube.rotation.x, targetX, media.matches ? 1.0 : 0.04);
+        cube.rotation.y = lerp(cube.rotation.y, targetY, media.matches ? 1.0 : 0.04);
+
+        renderer.setClearColor(0x000000, 0);
+        renderer.render(scene, camera);
+        rafId = requestAnimationFrame(tick);
+      }
+      tick();
+
+      window.matchMedia('(max-width: 600px)').addEventListener('change', applyResponsiveScaleAndAlignment);
+      window.addEventListener('beforeunload', () => { if (rafId) cancelAnimationFrame(rafId); io.disconnect(); }, { once: true });
+    }
+  </script>
+</body>
+</html>

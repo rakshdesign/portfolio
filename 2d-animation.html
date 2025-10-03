@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RAKSH — Work In Progress</title>
+  <meta name="description" content="Work in progress - Coming soon with exciting new projects" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --fg: #f2f2f2;
+      --muted: #b5b5b5;
+      --accent: #ff3b30;
+      --card: rgba(18,18,18,0.7);
+      --card-border: #2a2a2a;
+      --thumb: #161616;
+      --link: #f2f2f2;
+      --link-hover: var(--accent);
+      --focus: #ffd4d1;
+      --shadow: rgba(0,0,0,0.4);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { height: 100%; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+      text-rendering: optimizeLegibility;
+      cursor: none;
+    }
+
+    /* Custom red circle cursor */
+    .custom-cursor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 20px;
+      height: 20px;
+      background: var(--accent);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      mix-blend-mode: difference;
+      transition: transform 0.1s ease;
+    }
+
+    .custom-cursor.hover {
+      transform: scale(1.5);
+    }
+
+    .layer { position: relative; z-index: 1; }
+    .wrap { width: min(1200px, 94vw); margin-inline: auto; }
+
+    /* Back arrow */
+    .back-arrow {
+      position: absolute;
+      top: 2rem;
+      left: 2rem;
+      font-weight: 400;
+      font-size: 2rem;
+      color: var(--fg);
+      text-decoration: none;
+      border: none;
+      transition: color 0.2s ease;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+
+    .back-arrow:hover {
+      color: var(--accent);
+    }
+
+    header.hero {
+      min-height: 100svh;
+      display: grid;
+      place-items: center;
+      text-align: center;
+    }
+    .brand {
+      letter-spacing: -0.04em;
+      font-weight: 900;
+      line-height: 0.9;
+      text-transform: uppercase;
+      margin: 0;
+      padding: 0 0.5rem;
+      text-shadow: 0 6px 24px var(--shadow);
+    }
+    .brand .title { display: block; font-size: clamp(3rem, 12vw, 10rem); }
+    
+    /* Typewriter animations */
+    .typewriter-container {
+      margin-top: 3rem;
+      min-height: 80px;
+    }
+    
+    .typewriter-line {
+      margin-bottom: 1.5rem;
+      min-height: 1.6em;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .typewriter-text {
+      color: var(--muted);
+      font-weight: 300;
+      border-right: 2px solid var(--accent);
+      animation: blink 1s infinite;
+      font-size: clamp(1.2rem, 2vw, 1.6rem);
+      text-align: center;
+    }
+    
+    .typewriter-large {
+      font-size: clamp(1.4rem, 2.5vw, 2rem);
+      font-weight: 400;
+      color: var(--fg);
+    }
+    
+    .typewriter-accent {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    @keyframes blink {
+      0%, 100% { border-color: var(--accent); }
+      50% { border-color: transparent; }
+    }
+
+    footer { 
+      padding: 4rem 0 6rem; 
+      color: var(--muted); 
+      border-top: 1px solid var(--card-border); 
+      text-align: center;
+    }
+
+    a { 
+      color: var(--link); 
+      text-decoration: none; 
+      border-bottom: 1px solid currentColor; 
+    }
+    a:hover { color: var(--link-hover); }
+    a:focus-visible {
+      outline: 2px solid var(--focus);
+      outline-offset: 3px;
+      border-bottom: none;
+      border-radius: 4px;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .back-arrow {
+        top: 1.5rem;
+        left: 1.5rem;
+        font-size: 1.5rem;
+      }
+    }
+
+    /* Hide default cursor for interactive elements */
+    a {
+      cursor: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="custom-cursor"></div>
+
+  <div class="layer">
+    <a href="index.html" class="back-arrow" aria-label="Back to portfolio">←</a>
+    
+    <header class="hero" role="banner">
+      <div class="wrap">
+        <h1 class="brand" aria-label="Work In Progress">
+          <span class="title">WIP</span>
+        </h1>
+        <div class="typewriter-container" id="typewriterContainer">
+          <!-- Typewriter content will be dynamically inserted here -->
+        </div>
+      </div>
+    </header>
+
+    <footer role="contentinfo">
+      <div class="wrap">
+        <p>Email: <a href="mailto:rakshankumargiri@gmail.com" rel="me">rakshankumargiri@gmail.com</a>
+        · Instagram: <a href="https://www.instagram.com/raksh.design" rel="me noopener">raksh.design</a></p>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // Custom cursor functionality
+    const cursor = document.querySelector('.custom-cursor');
+    
+    document.addEventListener('mousemove', (e) => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+    });
+
+    // Add hover effect for interactive elements
+    const interactiveElements = document.querySelectorAll('a');
+    interactiveElements.forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        cursor.classList.add('hover');
+      });
+      el.addEventListener('mouseleave', () => {
+        cursor.classList.remove('hover');
+      });
+    });
+
+    // Hide cursor when leaving window
+    document.addEventListener('mouseleave', () => {
+      cursor.style.opacity = '0';
+    });
+    
+    document.addEventListener('mouseenter', () => {
+      cursor.style.opacity = '1';
+    });
+
+    // Natural typing speed variation function
+    function getRandomTypingSpeed() {
+      return Math.random() * 60 + 40; // Between 40ms and 100ms
+    }
+
+    // Hero typewriter sequences
+    const typewriterSequences = [
+      [
+        { text: "Work in Progress", class: "typewriter-large" },
+        { text: "Pushing pixels and breaking boundaries", class: "typewriter-text" }
+      ],
+      [
+        { text: "Under Construction", class: "typewriter-large" },
+        { text: "Good things take time", class: "typewriter-text typewriter-accent" }
+      ],
+      [
+        { text: "Coming Soon", class: "typewriter-large" },
+        { text: "The best is yet to come", class: "typewriter-text" }
+      ]
+    ];
+
+    let currentSequence = 0;
+    let currentLine = 0;
+    let currentChar = 0;
+    let isDeleting = false;
+    const typewriterContainer = document.getElementById('typewriterContainer');
+
+    function typeWriterSequence() {
+      const sequence = typewriterSequences[currentSequence];
+      if (currentLine >= sequence.length) {
+        // Move to next sequence after a pause
+        setTimeout(() => {
+          isDeleting = true;
+          typeWriterSequence();
+        }, 2000);
+        return;
+      }
+
+      const lineData = sequence[currentLine];
+      
+      // Get or create line element
+      let lineElement = typewriterContainer.children[currentLine];
+      if (!lineElement) {
+        lineElement = document.createElement('div');
+        lineElement.className = 'typewriter-line';
+        typewriterContainer.appendChild(lineElement);
+      }
+      
+      // Get or create text element
+      let textElement = lineElement.querySelector('.typewriter-text') || lineElement.querySelector('.typewriter-large') || lineElement.querySelector('.typewriter-accent');
+      if (!textElement) {
+        textElement = document.createElement('span');
+        textElement.className = lineData.class;
+        lineElement.appendChild(textElement);
+      }
+
+      if (isDeleting) {
+        // Deleting text
+        if (currentChar > 0) {
+          textElement.textContent = lineData.text.substring(0, currentChar - 1);
+          currentChar--;
+          setTimeout(typeWriterSequence, getRandomTypingSpeed() * 0.5);
+        } else {
+          // Finished deleting line
+          lineElement.remove();
+          currentLine++;
+          if (currentLine >= sequence.length) {
+            // Finished deleting sequence
+            currentLine = 0;
+            currentSequence = (currentSequence + 1) % typewriterSequences.length;
+            isDeleting = false;
+            setTimeout(typeWriterSequence, 500);
+          } else {
+            setTimeout(typeWriterSequence, 200);
+          }
+        }
+      } else {
+        // Typing text
+        if (currentChar < lineData.text.length) {
+          textElement.textContent = lineData.text.substring(0, currentChar + 1);
+          currentChar++;
+          setTimeout(typeWriterSequence, getRandomTypingSpeed());
+        } else {
+          // Finished typing line
+          currentLine++;
+          currentChar = 0;
+          setTimeout(typeWriterSequence, 800 + Math.random() * 400);
+        }
+      }
+    }
+
+    // Initialize everything
+    window.addEventListener('load', () => {
+      // Start main typewriter
+      setTimeout(typeWriterSequence, 1000);
+    });
+  </script>
+</body>
+</html>

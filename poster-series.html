@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>Poster Series — Raksh</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0a; --fg: #f2f2f2; --muted: #b5b5b5; --accent: #ff3b30;
+      --card: rgba(18,18,18,0.7); --card-border: #2a2a2a; --shadow: rgba(0,0,0,0.4);
+    }
+    body { margin:0; background:var(--bg); color:var(--fg); font-family:"Inter",sans-serif; line-height:1.5; }
+    .wrap { width:min(1100px,94vw); margin-inline:auto; padding:3rem 0; }
+    h1 { font-size:clamp(2rem,8vw,4rem); font-weight:900; margin:0; text-align:center; }
+    .tag { color:var(--muted); margin-top:.5rem; text-align:center; }
+    .hero { padding:4rem 1rem 2rem; position: relative; }
+    
+    /* Back arrow - positioned parallel to title */
+    .back-arrow {
+      position: absolute;
+      top: 50%;
+      left: 1rem;
+      transform: translateY(-50%);
+      font-size: 1.5rem;
+      color: var(--muted);
+      text-decoration: none;
+      border: none;
+      transition: color 200ms ease;
+    }
+    .back-arrow:hover {
+      color: var(--accent);
+    }
+    
+    /* Poster grid */
+    .poster-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    .poster-grid img {
+      width: 100%;
+      aspect-ratio: 3/4; /* poster ratio */
+      object-fit: cover;
+      border-radius: 12px;
+      border: 1px solid var(--card-border);
+      box-shadow: 0 4px 12px var(--shadow);
+      transition: transform 200ms ease, border-color 200ms ease;
+      cursor: pointer;
+    }
+    .poster-grid img:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent);
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.9);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal.active {
+      display: flex;
+    }
+    .modal-content {
+      max-width: 90%;
+      max-height: 90%;
+      object-fit: contain;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    }
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      color: white;
+      font-size: 2rem;
+      font-weight: bold;
+      cursor: pointer;
+      background: none;
+      border: none;
+      z-index: 1001;
+    }
+
+    .meta { margin-top:2rem; padding:1rem; border:1px solid var(--card-border); border-radius:12px; background:var(--card); }
+    a { color:var(--fg); text-decoration:none; border-bottom:1px solid currentColor; }
+    a:hover { color:var(--accent); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <a href="index.html" class="back-arrow">←</a>
+      <h1>Poster Series</h1>
+      <div class="tag">2025 · Visual Communication</div>
+    </header>
+
+    <div class="poster-grid">
+      <img src="images/1.jpg" alt="Poster 1">
+      <img src="images/2.jpg" alt="Poster 2">
+      <img src="images/3.jpg" alt="Poster 3">
+      <img src="images/4.jpg" alt="Poster 4">
+      <img src="images/5.jpg" alt="Poster 5">
+      <img src="images/6.jpg" alt="Poster 6">
+      <img src="images/7.jpg" alt="Poster 7">
+      <img src="images/8.jpg" alt="Poster 8">
+      <img src="images/9.jpg" alt="Poster 9">
+      <img src="images/10.jpg" alt="Poster 10">
+      <img src="images/11.jpg" alt="Poster 11">
+      <img src="images/12.jpg" alt="Poster 12">
+      <img src="images/13.jpg" alt="Poster 13">
+      <img src="images/14.jpg" alt="Poster 14">
+      <img src="images/15.jpg" alt="Poster 15">
+      <img src="images/16.jpg" alt="Poster 16">
+      <img src="images/17.jpg" alt="Poster 17">
+      <img src="images/18.jpg" alt="Poster 18">
+      <img src="images/19.jpg" alt="Poster 19">
+      <img src="images/20.jpg" alt="Poster 20">
+    </div>
+
+    <p style="margin-top:2rem;">
+      This series of 20 experimental posters explores typography, color, and layout variations.
+      Each piece works individually but also contributes to the larger collection.
+    </p>
+
+    <div class="meta">
+      <strong>Tools:</strong> Photoshop, Illustrator<br>
+      <strong>Year:</strong> 2025
+    </div>
+
+    <!-- Modal for full-size poster viewing -->
+    <div class="modal" id="posterModal">
+      <button class="modal-close" id="modalClose">&times;</button>
+      <img class="modal-content" id="modalImg">
+    </div>
+  </div>
+
+  <script>
+    // Modal functionality
+    const modal = document.getElementById('posterModal');
+    const modalImg = document.getElementById('modalImg');
+    const modalClose = document.getElementById('modalClose');
+    const posterImages = document.querySelectorAll('.poster-grid img');
+    
+    // Open modal with clicked image
+    posterImages.forEach((img) => {
+      img.addEventListener('click', () => {
+        modal.classList.add('active');
+        modalImg.src = img.src;
+      });
+    });
+    
+    // Close modal
+    modalClose.addEventListener('click', () => {
+      modal.classList.remove('active');
+    });
+    
+    // Close modal when clicking outside the image
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.classList.remove('active');
+      }
+    });
+    
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (modal.classList.contains('active')) {
+        if (e.key === 'Escape') {
+          modal.classList.remove('active');
+        }
+      }
+    });
+    
+    // Full screen on mobile
+    function requestFullScreen() {
+      const docEl = document.documentElement;
+      if (docEl.requestFullscreen) {
+        docEl.requestFullscreen();
+      } else if (docEl.mozRequestFullScreen) {
+        docEl.mozRequestFullScreen();
+      } else if (docEl.webkitRequestFullscreen) {
+        docEl.webkitRequestFullscreen();
+      } else if (docEl.msRequestFullscreen) {
+        docEl.msRequestFullscreen();
+      }
+    }
+    
+    // Try to enter fullscreen on mobile devices
+    if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+      // Add a small delay to ensure page is loaded
+      setTimeout(requestFullScreen, 500);
+    }
+  </script>
+</body>
+</html>

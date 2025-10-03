@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RAKSH — Disconnect Zine</title>
+  <meta name="description" content="Disconnect Zine - A visual exploration of digital addiction" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --fg: #f2f2f2;
+      --muted: #b5b5b5;
+      --accent: #ff3b30;
+      --card: rgba(18,18,18,0.7);
+      --card-border: #2a2a2a;
+      --thumb: #161616;
+      --link: #f2f2f2;
+      --link-hover: var(--accent);
+      --focus: #ffd4d1;
+      --shadow: rgba(0,0,0,0.4);
+      --frame-color: #e0e0e0;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { height: 100%; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+      text-rendering: optimizeLegibility;
+      cursor: none;
+    }
+
+    /* Custom red circle cursor */
+    .custom-cursor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 20px;
+      height: 20px;
+      background: var(--accent);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      mix-blend-mode: difference;
+      transition: transform 0.1s ease;
+    }
+
+    .custom-cursor.hover {
+      transform: scale(1.5);
+    }
+
+    .layer { position: relative; z-index: 1; }
+    .wrap { width: min(1200px, 94vw); margin-inline: auto; }
+
+    /* Back arrow */
+    .back-arrow {
+      position: absolute;
+      top: 2rem;
+      left: 2rem;
+      font-weight: 400;
+      font-size: 2rem;
+      color: var(--fg);
+      text-decoration: none;
+      border: none;
+      transition: color 0.2s ease;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+
+    .back-arrow:hover {
+      color: var(--accent);
+    }
+
+    header.hero {
+      min-height: 20svh;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .brand {
+      letter-spacing: -0.04em;
+      font-weight: 900;
+      line-height: 0.9;
+      text-transform: uppercase;
+      margin: 0;
+      padding: 0 0.5rem;
+      text-shadow: 0 6px 24px var(--shadow);
+    }
+    .brand .title { display: block; font-size: clamp(2rem, 8vw, 5rem); }
+    .subtitle {
+      color: var(--muted);
+      font-weight: 300;
+      font-size: clamp(0.9rem, 1.2vw, 1.1rem);
+      margin-top: 1rem;
+    }
+
+    /* Zine Gallery */
+    .zine-gallery {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 4rem 0;
+    }
+
+    .gallery-container {
+      position: relative;
+      width: 100%;
+      max-width: 600px;
+      aspect-ratio: 1/1;
+      margin: 0 auto;
+      overflow: hidden;
+      border-radius: 4px;
+      box-shadow: 0 10px 30px var(--shadow);
+      background: var(--card);
+      border: 2px solid var(--frame-color);
+    }
+
+    .gallery-track {
+      display: flex;
+      transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      height: 100%;
+    }
+
+    .gallery-slide {
+      min-width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .slide-image {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: var(--thumb);
+    }
+
+    .slide-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--thumb);
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 2.5rem;
+      text-transform: uppercase;
+      font-family: 'Courier New', monospace;
+      letter-spacing: 2px;
+    }
+
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--card-border);
+      border-top: 3px solid var(--frame-color);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Navigation Controls */
+    .gallery-controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .nav-arrow {
+      font-weight: 400;
+      font-size: 2rem;
+      color: var(--fg);
+      text-decoration: none;
+      border: none;
+      transition: color 0.2s ease;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: none;
+      cursor: none;
+    }
+
+    .nav-arrow:hover {
+      color: var(--accent);
+    }
+
+    .nav-arrow:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .nav-arrow:disabled:hover {
+      color: var(--fg);
+    }
+
+    .gallery-indicators {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--card-border);
+      transition: background 0.3s ease, transform 0.3s ease;
+      cursor: none;
+    }
+
+    .indicator.active {
+      background: var(--frame-color);
+      transform: scale(1.2);
+    }
+
+    .zine-description {
+      margin-top: 3rem;
+      max-width: 800px;
+      padding: 0 1rem;
+    }
+
+    .zine-section {
+      margin-bottom: 2rem;
+    }
+
+    .zine-section h3 {
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+      color: var(--accent);
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 0.5rem;
+    }
+
+    .zine-section p {
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+
+    .zine-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .tag {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    footer { 
+      padding: 4rem 0 6rem; 
+      color: var(--muted); 
+      border-top: 1px solid var(--card-border); 
+      text-align: center;
+    }
+
+    a { 
+      color: var(--link); 
+      text-decoration: none; 
+      border-bottom: 1px solid currentColor; 
+    }
+    a:hover { color: var(--link-hover); }
+    a:focus-visible {
+      outline: 2px solid var(--focus);
+      outline-offset: 3px;
+      border-bottom: none;
+      border-radius: 4px;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .gallery-container {
+        max-width: 90vw;
+        aspect-ratio: 1/1;
+      }
+      
+      .back-arrow {
+        top: 1.5rem;
+        left: 1.5rem;
+        font-size: 1.5rem;
+      }
+      
+      .nav-arrow {
+        font-size: 1.8rem;
+        width: 45px;
+        height: 45px;
+      }
+      
+      .slide-placeholder {
+        font-size: 2rem;
+      }
+      
+      .gallery-controls {
+        gap: 1.5rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .zine-gallery {
+        padding: 2rem 0;
+      }
+      
+      .slide-placeholder {
+        font-size: 1.5rem;
+      }
+      
+      .nav-arrow {
+        font-size: 1.5rem;
+        width: 40px;
+        height: 40px;
+      }
+    }
+
+    /* Hide default cursor for interactive elements */
+    a, .indicator, .nav-arrow {
+      cursor: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="custom-cursor"></div>
+
+  <div class="layer">
+    <a href="index.html" class="back-arrow" aria-label="Back to portfolio">←</a>
+    
+    <header class="hero" role="banner">
+      <div class="wrap">
+        <h1 class="brand" aria-label="Disconnect Zine">
+          <span class="title">DISCONNECT</span>
+        </h1>
+        <div class="subtitle">
+          A visual exploration of digital addiction • 2025
+        </div>
+      </div>
+    </header>
+
+    <main id="main" role="main">
+      <div class="zine-gallery">
+        <div class="gallery-container" id="galleryContainer">
+          <div class="gallery-track" id="galleryTrack">
+            <!-- Slides will be dynamically inserted here -->
+          </div>
+        </div>
+        
+        <div class="gallery-controls">
+          <button class="nav-arrow" id="prevBtn" aria-label="Previous page">←</button>
+          <div class="gallery-indicators" id="indicators">
+            <!-- Indicators will be dynamically inserted here -->
+          </div>
+          <button class="nav-arrow" id="nextBtn" aria-label="Next page">→</button>
+        </div>
+        
+        <div class="zine-description">
+          <div class="zine-section">
+            <h3>Concept</h3>
+            <p>In a world flooded with glowing screens, I wanted to capture the feeling of being trapped inside one. <strong>Disconnect</strong> explores digital addiction through the lens of nostalgia and distortion.</p>
+          </div>
+          
+          <div class="zine-section">
+            <h3>Inspiration & Research</h3>
+            <p>CRT screens, VHS tapes, retro monitors. Themes of time loss, endless scrolling, distorted identity.</p>
+          </div>
+          
+          <div class="zine-section">
+            <h3>Visual System</h3>
+            <p>Typefaces: arcadeclassic, merchant-copy</p>
+            <p>Colors: RGB neon + grayscale base</p>
+            <p>Textures: Scanlines, VHS static, chromatic aberration overlays</p>
+            <p>Format: 1:1 ratio, 11 pages</p>
+          </div>
+          
+          <div class="zine-section">
+            <h3>Process & Iterations</h3>
+            <p>Distorted photos into pixelated / low-res forms. Experimented with different levels of noise + scanline density.</p>
+          </div>
+          
+          <div class="zine-section">
+            <h3>Outcome</h3>
+            <p>Both nostalgic and critical → scroll-stopping when presented digitally or printed.</p>
+          </div>
+          
+          <div class="zine-tags">
+            <span class="tag">Zine</span>
+            <span class="tag">Digital Addiction</span>
+            <span class="tag">CRT Aesthetic</span>
+            <span class="tag">Experimental Typography</span>
+            <span class="tag">2025</span>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer role="contentinfo">
+      <div class="wrap">
+        <p>Email: <a href="mailto:rakshankumargiri@gmail.com" rel="me">rakshankumargiri@gmail.com</a>
+        · Instagram: <a href="https://www.instagram.com/raksh.design" rel="me noopener">raksh.design</a></p>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // Custom cursor functionality
+    const cursor = document.querySelector('.custom-cursor');
+    
+    document.addEventListener('mousemove', (e) => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+    });
+
+    // Add hover effect for interactive elements
+    const interactiveElements = document.querySelectorAll('a, .indicator, .nav-arrow');
+    interactiveElements.forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        cursor.classList.add('hover');
+      });
+      el.addEventListener('mouseleave', () => {
+        cursor.classList.remove('hover');
+      });
+    });
+
+    // Hide cursor when leaving window
+    document.addEventListener('mouseleave', () => {
+      cursor.style.opacity = '0';
+    });
+    
+    document.addEventListener('mouseenter', () => {
+      cursor.style.opacity = '1';
+    });
+
+    // Zine gallery data with actual image paths
+    const zineSlides = [
+      { id: 1, image: 'images/z1.png' },
+      { id: 2, image: 'images/z2.png' },
+      { id: 3, image: 'images/z3.png' },
+      { id: 4, image: 'images/z4.png' },
+      { id: 5, image: 'images/z5.png' },
+      { id: 6, image: 'images/z6.png' },
+      { id: 7, image: 'images/z7.png' },
+      { id: 8, image: 'images/z8.png' },
+      { id: 9, image: 'images/z9.png' },
+      { id: 10, image: 'images/z10.png' },
+      { id: 11, image: 'images/z11.png' }
+    ];
+
+    // Initialize gallery
+    const galleryTrack = document.getElementById('galleryTrack');
+    const indicatorsContainer = document.getElementById('indicators');
+    const galleryContainer = document.getElementById('galleryContainer');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    let currentSlide = 0;
+    let isAnimating = false;
+
+    // Create slides and indicators
+    zineSlides.forEach((slide, index) => {
+      // Create slide
+      const slideElement = document.createElement('div');
+      slideElement.className = 'gallery-slide';
+      slideElement.setAttribute('data-index', index);
+      
+      // Create loading spinner
+      const spinner = document.createElement('div');
+      spinner.className = 'loading-spinner';
+      
+      // Create image element
+      const img = document.createElement('img');
+      img.className = 'slide-image';
+      img.src = slide.image;
+      img.alt = `Disconnect Zine Page ${slide.id}`;
+      img.style.display = 'none'; // Hide initially
+      
+      // Create placeholder as fallback
+      const placeholder = document.createElement('div');
+      placeholder.className = 'slide-placeholder';
+      placeholder.textContent = `Z${slide.id}`;
+      placeholder.style.display = 'none'; // Hide initially
+      
+      // Load image with error handling
+      img.onload = function() {
+        spinner.style.display = 'none';
+        img.style.display = 'block';
+      };
+      
+      img.onerror = function() {
+        spinner.style.display = 'none';
+        placeholder.style.display = 'flex';
+        console.warn(`Failed to load image: ${slide.image}`);
+      };
+      
+      slideElement.appendChild(spinner);
+      slideElement.appendChild(img);
+      slideElement.appendChild(placeholder);
+      galleryTrack.appendChild(slideElement);
+      
+      // Create indicator
+      const indicator = document.createElement('div');
+      indicator.className = 'indicator';
+      if (index === 0) indicator.classList.add('active');
+      indicator.setAttribute('data-index', index);
+      indicatorsContainer.appendChild(indicator);
+    });
+
+    // Update slide info and button states
+    function updateSlideInfo() {      
+      // Update indicators
+      document.querySelectorAll('.indicator').forEach((indicator, index) => {
+        if (index === currentSlide) {
+          indicator.classList.add('active');
+        } else {
+          indicator.classList.remove('active');
+        }
+      });
+      
+      // Update button states
+      prevBtn.disabled = currentSlide === 0;
+      nextBtn.disabled = currentSlide === zineSlides.length - 1;
+    }
+
+    // Navigate to specific slide
+    function goToSlide(index) {
+      if (isAnimating) return;
+      
+      isAnimating = true;
+      currentSlide = index;
+      galleryTrack.style.transform = `translateX(-${currentSlide * 100}%)`;
+      updateSlideInfo();
+      
+      // Reset animation flag after transition
+      setTimeout(() => {
+        isAnimating = false;
+      }, 500);
+    }
+
+    // Next slide
+    function nextSlide() {
+      if (currentSlide < zineSlides.length - 1) {
+        goToSlide(currentSlide + 1);
+      }
+    }
+
+    // Previous slide
+    function prevSlide() {
+      if (currentSlide > 0) {
+        goToSlide(currentSlide - 1);
+      }
+    }
+
+    // Touch/swipe functionality
+    let startX = 0;
+    let currentX = 0;
+    let isDragging = false;
+
+    galleryContainer.addEventListener('touchstart', (e) => {
+      startX = e.touches[0].clientX;
+      isDragging = true;
+      galleryTrack.style.transition = 'none';
+    });
+
+    galleryContainer.addEventListener('touchmove', (e) => {
+      if (!isDragging) return;
+      currentX = e.touches[0].clientX;
+      const diff = currentX - startX;
+      galleryTrack.style.transform = `translateX(calc(-${currentSlide * 100}% + ${diff}px))`;
+    });
+
+    galleryContainer.addEventListener('touchend', () => {
+      if (!isDragging) return;
+      isDragging = false;
+      galleryTrack.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+      
+      const diff = currentX - startX;
+      const threshold = 50;
+      
+      if (diff > threshold && currentSlide > 0) {
+        prevSlide();
+      } else if (diff < -threshold && currentSlide < zineSlides.length - 1) {
+        nextSlide();
+      } else {
+        // Return to current slide
+        galleryTrack.style.transform = `translateX(-${currentSlide * 100}%)`;
+      }
+    });
+
+    // Mouse drag functionality
+    galleryContainer.addEventListener('mousedown', (e) => {
+      startX = e.clientX;
+      isDragging = true;
+      galleryTrack.style.transition = 'none';
+      e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      currentX = e.clientX;
+      const diff = currentX - startX;
+      galleryTrack.style.transform = `translateX(calc(-${currentSlide * 100}% + ${diff}px))`;
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (!isDragging) return;
+      isDragging = false;
+      galleryTrack.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+      
+      const diff = currentX - startX;
+      const threshold = 50;
+      
+      if (diff > threshold && currentSlide > 0) {
+        prevSlide();
+      } else if (diff < -threshold && currentSlide < zineSlides.length - 1) {
+        nextSlide();
+      } else {
+        // Return to current slide
+        galleryTrack.style.transform = `translateX(-${currentSlide * 100}%)`;
+      }
+    });
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') {
+        prevSlide();
+      } else if (e.key === 'ArrowRight') {
+        nextSlide();
+      }
+    });
+
+    // Button event listeners
+    prevBtn.addEventListener('click', prevSlide);
+    nextBtn.addEventListener('click', nextSlide);
+
+    // Indicator click events
+    document.querySelectorAll('.indicator').forEach((indicator) => {
+      indicator.addEventListener('click', () => {
+        const index = parseInt(indicator.getAttribute('data-index'));
+        goToSlide(index);
+      });
+    });
+
+    // Initialize
+    updateSlideInfo();
+
+    // Preload next and previous images for smoother transitions
+    function preloadAdjacentImages() {
+      const prevIndex = (currentSlide - 1 + zineSlides.length) % zineSlides.length;
+      const nextIndex = (currentSlide + 1) % zineSlides.length;
+      
+      [prevIndex, nextIndex].forEach(index => {
+        const img = new Image();
+        img.src = zineSlides[index].image;
+      });
+    }
+
+    // Preload initial adjacent images
+    preloadAdjacentImages();
+  </script>
+</body>
+</html>
